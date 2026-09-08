@@ -1,0 +1,492 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id               String      @id
+  name             String
+  email            String
+  emailVerified    Boolean     @default(false)
+  image            String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  twoFactorEnabled Boolean?    @default(false)
+  role             String      @default("STANDARD")
+  isActive         Boolean     @default(true)
+  displayName      String?
+  username         String?
+  sessions         Session[]
+  accounts         Account[]
+  twofactors       TwoFactor[]
+
+  createdBooks            Book[]                     @relation("BookCreatedBy")
+  uploadedVersions        DocumentVersion[]
+  privateAccess           BookPrivateAccess[]        @relation("PrivateAccessUser")
+  grantedAccess           BookPrivateAccess[]        @relation("PrivateAccessGrantedBy")
+  readingPathAccess       ReadingPathPrivateAccess[] @relation("ReadingPathPrivateAccessUser")
+  grantedPathAccess       ReadingPathPrivateAccess[] @relation("ReadingPathPrivateAccessGrantedBy")
+  collectionAccess        CollectionPrivateAccess[]  @relation("CollectionPrivateAccessUser")
+  grantedCollectionAccess CollectionPrivateAccess[]  @relation("CollectionPrivateAccessGrantedBy")
+  annotations             Annotation[]
+  createdReadingPaths     ReadingPath[]
+  createdCollections      Collection[]
+  bookRequests            BookRequest[]
+  issueReports            IssueReport[]
+  auditLogEntries         AuditLog[]
+
+  @@unique([email])
+  @@index([role])
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  issuer                String
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@unique([issuer, accountId], map: "account_issuer_accountId_uidx")
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+model TwoFactor {
+  id                      String    @id
+  secret                  String
+  backupCodes             String
+  userId                  String
+  user                    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  verified                Boolean?  @default(true)
+  failedVerificationCount Int?      @default(0)
+  lockedUntil             DateTime?
+
+  @@index([secret])
+  @@index([userId])
+  @@map("twoFactor")
+}
+
+// ---------------------------------------------------------------------------
+// Library domain
+// ---------------------------------------------------------------------------
+
+enum Visibility {
+  DRAFT
+  PUBLIC
+  PRIVATE
+}
+
+// Controlled, librarian-extendable vocabularies (spec §6): languages, church
+// traditions, categories, document types, rights statuses, topics and church
+// fathers all share the same shape, so one table with a type discriminator
+// replaces what would otherwise be six near-identical tables.
+enum TermType {
+  LANGUAGE
+  CHURCH_TRADITION
+  CATEGORY
+  DOCUMENT_TYPE
+  RIGHTS_STATUS
+  TOPIC
+  CHURCH_FATHER
+}
+
+model ControlledTerm {
+  id        String   @id @default(cuid())
+  type      TermType
+  value     String
+  label     String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  booksByLanguage     Book[] @relation("BookLanguage")
+  booksByTradition    Book[] @relation("BookTradition")
+  booksByCategory     Book[] @relation("BookCategory")
+  booksByDocumentType Book[] @relation("BookDocumentType")
+  booksByRights       Book[] @relation("BookRights")
+  booksByTopic        Book[] @relation("BookTopics")
+  booksByChurchFather Book[] @relation("BookChurchFathers")
+
+  @@unique([type, value])
+  @@index([type, active])
+}
+
+model Book {
+  id                   String   @id @default(cuid())
+  title                String
+  alternateTitle       String?
+  originalTitle        String?
+  author               String?
+  translator           String?
+  editor               String?
+  publisher            String?
+  publicationYear      Int?
+  description          String?  @db.Text
+  coverImageStorageKey String?
+  pageCount            Int?
+  provenance           String?  @db.Text
+  scriptureReferences  String[] @default([])
+  checksumSha256       String?
+
+  languageId        String
+  language          ControlledTerm   @relation("BookLanguage", fields: [languageId], references: [id])
+  churchTraditionId String
+  churchTradition   ControlledTerm   @relation("BookTradition", fields: [churchTraditionId], references: [id])
+  categoryId        String?
+  category          ControlledTerm?  @relation("BookCategory", fields: [categoryId], references: [id])
+  documentTypeId    String
+  documentType      ControlledTerm   @relation("BookDocumentType", fields: [documentTypeId], references: [id])
+  rightsStatusId    String?
+  rightsStatus      ControlledTerm?  @relation("BookRights", fields: [rightsStatusId], references: [id])
+  topics            ControlledTerm[] @relation("BookTopics")
+  churchFathers     ControlledTerm[] @relation("BookChurchFathers")
+
+  visibility         Visibility @default(DRAFT)
+  allowOnlineReading Boolean    @default(true)
+  allowDownload      Boolean    @default(false)
+
+  versions        DocumentVersion[] @relation("BookVersions")
+  activeVersionId String?           @unique
+  activeVersion   DocumentVersion?  @relation("ActiveVersion", fields: [activeVersionId], references: [id])
+
+  privateAccess         BookPrivateAccess[]
+  annotations           Annotation[]
+  readingPathSteps      ReadingPathStep[]
+  collectionBooks       CollectionBook[]
+  issueReports          IssueReport[]
+  bookRequestsFulfilled BookRequest[]
+
+  relatedTo   BookRelation[] @relation("RelationFrom")
+  relatedFrom BookRelation[] @relation("RelationTo")
+
+  createdById String
+  createdBy   User     @relation("BookCreatedBy", fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([visibility])
+  @@index([languageId])
+  @@index([churchTraditionId])
+  @@index([checksumSha256])
+}
+
+model BookPrivateAccess {
+  id          String   @id @default(cuid())
+  bookId      String
+  book        Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User     @relation("PrivateAccessUser", fields: [userId], references: [id], onDelete: Cascade)
+  grantedById String
+  grantedBy   User     @relation("PrivateAccessGrantedBy", fields: [grantedById], references: [id])
+  grantedAt   DateTime @default(now())
+
+  @@unique([bookId, userId])
+  @@index([userId])
+}
+
+enum OcrStatus {
+  NOT_APPLICABLE
+  PENDING
+  PROCESSING
+  COMPLETE
+  FAILED
+}
+
+// Original uploads are preserved as-is (spec §8, §24): a replacement scan
+// creates a new version rather than overwriting the file behind an old one,
+// so existing annotations keep pointing at the version they were made on.
+model DocumentVersion {
+  id                String    @id @default(cuid())
+  bookId            String
+  book              Book      @relation("BookVersions", fields: [bookId], references: [id], onDelete: Cascade)
+  versionNumber     Int
+  storageKey        String
+  originalFilename  String
+  mimeType          String
+  fileSizeBytes     Int
+  checksumSha256    String
+  ocrStatus         OcrStatus @default(NOT_APPLICABLE)
+  ocrTextStorageKey String?
+  uploadedById      String
+  uploadedBy        User      @relation(fields: [uploadedById], references: [id])
+  createdAt         DateTime  @default(now())
+
+  activeForBook Book?        @relation("ActiveVersion")
+  annotations   Annotation[]
+
+  @@unique([bookId, versionNumber])
+}
+
+model Annotation {
+  id                String          @id @default(cuid())
+  userId            String
+  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookId            String
+  book              Book            @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  documentVersionId String
+  documentVersion   DocumentVersion @relation(fields: [documentVersionId], references: [id], onDelete: Cascade)
+  location          Json
+  selectedText      String?         @db.Text
+  // Null highlightData + null selectedText means this row is a plain
+  // Bookmark (spec: "Bookmarks" and "returning to saved locations") rather
+  // than a text highlight — reusing this model instead of adding a near-
+  // identical Bookmark table, since both are just "a location, optionally
+  // with a highlight and/or a note" for a user in a book.
+  highlightData     Json?
+  note              String?         @db.Text
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@index([userId, bookId])
+  @@index([documentVersionId])
+}
+
+model ReadingPath {
+  id                   String                     @id @default(cuid())
+  title                String
+  description          String?                    @db.Text
+  topic                String?
+  coverImageStorageKey String?
+  visibility           Visibility                 @default(DRAFT)
+  steps                ReadingPathStep[]
+  privateAccess        ReadingPathPrivateAccess[]
+  createdById          String
+  createdBy            User                       @relation(fields: [createdById], references: [id])
+  createdAt            DateTime                   @default(now())
+  updatedAt            DateTime                   @updatedAt
+
+  @@index([visibility])
+}
+
+// Mirrors BookPrivateAccess — kept as a separate grant list (rather than
+// reusing a book's grants) because being able to see a Reading Path and
+// being able to see every book it references are independent questions
+// (spec §13: a public path must never leak the existence of a private book
+// it happens to include).
+model ReadingPathPrivateAccess {
+  id            String      @id @default(cuid())
+  readingPathId String
+  readingPath   ReadingPath @relation(fields: [readingPathId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User        @relation("ReadingPathPrivateAccessUser", fields: [userId], references: [id], onDelete: Cascade)
+  grantedById   String
+  grantedBy     User        @relation("ReadingPathPrivateAccessGrantedBy", fields: [grantedById], references: [id])
+  grantedAt     DateTime    @default(now())
+
+  @@unique([readingPathId, userId])
+  @@index([userId])
+}
+
+model ReadingPathStep {
+  id            String      @id @default(cuid())
+  readingPathId String
+  readingPath   ReadingPath @relation(fields: [readingPathId], references: [id], onDelete: Cascade)
+  bookId        String
+  book          Book        @relation(fields: [bookId], references: [id])
+  order         Int
+  explanation   String?     @db.Text
+
+  @@unique([readingPathId, order])
+  @@unique([readingPathId, bookId])
+}
+
+model Collection {
+  id                   String                    @id @default(cuid())
+  title                String
+  description          String?                   @db.Text
+  coverImageStorageKey String?
+  visibility           Visibility                @default(DRAFT)
+  books                CollectionBook[]
+  privateAccess        CollectionPrivateAccess[]
+  createdById          String
+  createdBy            User                      @relation(fields: [createdById], references: [id])
+  createdAt            DateTime                  @default(now())
+  updatedAt            DateTime                  @updatedAt
+
+  @@index([visibility])
+}
+
+// Mirrors ReadingPathPrivateAccess/BookPrivateAccess (spec §33: private
+// books must never leak through Collections either).
+model CollectionPrivateAccess {
+  id           String     @id @default(cuid())
+  collectionId String
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User       @relation("CollectionPrivateAccessUser", fields: [userId], references: [id], onDelete: Cascade)
+  grantedById  String
+  grantedBy    User       @relation("CollectionPrivateAccessGrantedBy", fields: [grantedById], references: [id])
+  grantedAt    DateTime   @default(now())
+
+  @@unique([collectionId, userId])
+  @@index([userId])
+}
+
+model CollectionBook {
+  id           String     @id @default(cuid())
+  collectionId String
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  bookId       String
+  book         Book       @relation(fields: [bookId], references: [id])
+  order        Int        @default(0)
+
+  @@unique([collectionId, bookId])
+}
+
+// Librarian-curated related books, in addition to metadata-based similarity
+// computed at query time (spec §15).
+model BookRelation {
+  id         String   @id @default(cuid())
+  fromBookId String
+  fromBook   Book     @relation("RelationFrom", fields: [fromBookId], references: [id], onDelete: Cascade)
+  toBookId   String
+  toBook     Book     @relation("RelationTo", fields: [toBookId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([fromBookId, toBookId])
+}
+
+enum RequestStatus {
+  NEW
+  REVIEWING
+  APPROVED
+  ADDED
+  DECLINED
+}
+
+model BookRequest {
+  id               String        @id @default(cuid())
+  title            String
+  author           String?
+  language         String?
+  churchTradition  String?
+  sourceLink       String?
+  reason           String?       @db.Text
+  comments         String?       @db.Text
+  requesterName    String?
+  requesterContact String?
+  requesterUserId  String?
+  requesterUser    User?         @relation(fields: [requesterUserId], references: [id])
+  status           RequestStatus @default(NEW)
+  internalNotes    String?       @db.Text
+  fulfilledBookId  String?
+  fulfilledBook    Book?         @relation(fields: [fulfilledBookId], references: [id])
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  @@index([status])
+}
+
+enum IssueReason {
+  COPYRIGHT
+  INCORRECT_ATTRIBUTION
+  INCORRECT_METADATA
+  BROKEN_FILE
+  POOR_SCAN
+  MISSING_PAGES
+  THEOLOGICAL_CATEGORIZATION
+  OTHER
+}
+
+enum IssueStatus {
+  NEW
+  REVIEWING
+  RESOLVED
+  DISMISSED
+}
+
+model IssueReport {
+  id             String      @id @default(cuid())
+  bookId         String
+  book           Book        @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  reason         IssueReason
+  details        String?     @db.Text
+  reporterUserId String?
+  reporterUser   User?       @relation(fields: [reporterUserId], references: [id])
+  status         IssueStatus @default(NEW)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  @@index([status])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  actor      User?    @relation(fields: [actorId], references: [id])
+  action     String
+  targetType String?
+  targetId   String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  @@index([actorId])
+  @@index([targetType, targetId])
+  @@index([createdAt])
+}
+
+// Footer churches are configurable and disabled by default (spec §26): no
+// logo appears publicly until a librarian explicitly enables it.
+model FooterChurch {
+  id             String  @id @default(cuid())
+  name           String
+  logoStorageKey String?
+  websiteUrl     String?
+  displayOrder   Int     @default(0)
+  enabled        Boolean @default(false)
+
+  @@index([displayOrder])
+}
+
+model SiteSetting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+}

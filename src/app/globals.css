@@ -1,0 +1,99 @@
+@import "tailwindcss";
+
+:root {
+  /* OrientalCodex brand palette (spec: white/off-white, deep burgundy, dark
+     navy, restrained gold, professional rather than flashy). Deliberately
+     not theme-switched for dark mode — a scholarly print-library look stays
+     consistent regardless of OS theme, the same way it would in print.
+
+     This is the single source of truth for color in the app — components
+     never hard-code a hex or a raw Tailwind color utility (bg-white,
+     text-gray-500, etc). Add a new color here first, then reference it via
+     the matching `--color-*` entry below. */
+  --background: #faf8f4; /* page background */
+  --surface: #ffffff; /* cards, panels, inputs — anything sitting "on top of" the page */
+  --surface-muted: #f2ecdd; /* secondary surface — parchment, one step darker than background,
+                                for sections that need to read as a distinct "panel" without a card */
+  --foreground: #1c2b3a; /* body text */
+  --muted: #5b6470; /* secondary text, placeholders */
+  --border: #ddd6c9; /* hairlines, input/card borders */
+  --border-strong: #c7bc9e; /* dividers that need to read as structural rather than a hairline
+                                (section rules, communion-strip border) */
+
+  --navy: #1c2b3a; /* primary brand accent — same value as --foreground today,
+                       kept as a separate token because the two mean different
+                       things (a text color vs. a brand/button color) even
+                       though they currently match */
+  --burgundy: #8a1f2d; /* hover/link accent, and the base for the danger scale */
+  --gold: #b8962e; /* restrained highlight accent — tags, "featured", focus ring */
+
+  /* Semantic roles, composed from the brand palette above rather than new
+     hues — a second accent color (e.g. a stock UI red/green) would break
+     the "scholarly print" direction the palette comment above describes. */
+  --primary: var(--navy);
+  --primary-foreground: var(--background);
+  --danger: var(--burgundy);
+  --danger-foreground: var(--background);
+  --focus-ring: var(--gold);
+
+  /* True semantic colors — deliberately NOT brand hues. Burgundy already
+     means "danger" above; success/warning/info need their own identity so a
+     status color never gets read as a brand accent or vice versa. Muted
+     (desaturated) so they sit quietly next to the brand palette instead of
+     looking like stock SaaS-UI chips. */
+  --success: #3f6b3f;
+  --warning: #9a6b1f;
+  --info: #3a5a78;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-navy: var(--navy);
+  --color-burgundy: var(--burgundy);
+  --color-gold: var(--gold);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-danger: var(--danger);
+  --color-danger-foreground: var(--danger-foreground);
+  --color-focus-ring: var(--focus-ring);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-serif: var(--font-spectral), ui-serif, Georgia, serif;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* Every page's <main> is a flex item of <body>'s flex column (see
+   layout.tsx), styled with `mx-auto max-w-* ...` to center a capped-width
+   column. On a flex item, auto margins in the cross axis (mx-auto here)
+   override align-items:stretch and fall back to shrink-to-fit sizing — so
+   instead of filling the viewport and capping at max-width, <main> was
+   sizing itself to its widest descendant (e.g. a data table's
+   min-w-[...]px) and overflowing the viewport on mobile. Forcing width:100%
+   restores fill-then-cap sizing; min-width:0 stops that same shrink-to-fit
+   fallback from reasserting itself through the content-based automatic
+   minimum size. */
+main {
+  width: 100%;
+  min-width: 0;
+}
+
+/* Dialog.tsx renders a native <dialog> — Tailwind has no utility for the
+   ::backdrop pseudo-element, and it isn't styled by default (a bare
+   <dialog> gets a transparent backdrop), so this is plain CSS rather than a
+   gap in the component. */
+dialog::backdrop {
+  background: rgb(28 43 58 / 50%); /* --navy at 50% */
+}
