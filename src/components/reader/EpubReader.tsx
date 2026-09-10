@@ -41,11 +41,14 @@ export function EpubReader({ fileUrl, annotations, onCreate, apiRef }: SubReader
 
     async function load() {
       try {
-        // Fetch ourselves (with the session cookie) rather than letting
-        // epub.js fetch the URL internally — this endpoint requires auth on
-        // its first hop before redirecting to the actual signed file, and we
-        // want that cookie sent regardless of epub.js's own fetch defaults.
-        const res = await fetch(fileUrl, { credentials: "include" });
+        // Fetch ourselves rather than letting epub.js fetch the URL
+        // internally — this endpoint requires auth on its first hop before
+        // redirecting to the actual signed file. Default ("same-origin")
+        // credentials mode already sends the session cookie on that
+        // same-origin hop; "include" would additionally demand the redirect
+        // target grant Access-Control-Allow-Credentials, which S3-style CORS
+        // on the signed file URL has no way to do.
+        const res = await fetch(fileUrl);
         if (!res.ok) throw new Error("Failed to fetch document");
         const buffer = await res.arrayBuffer();
         if (cancelled) return;

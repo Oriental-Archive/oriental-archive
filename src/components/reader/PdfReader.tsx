@@ -28,7 +28,12 @@ type HighlightData = { page: number; color: string; rects: Rect[] };
 type Rect = { x: number; y: number; w: number; h: number };
 type PdfLocation = { page: number };
 
-const DOCUMENT_OPTIONS = { withCredentials: true };
+// Not `withCredentials: true`: the file endpoint redirects to a cross-origin
+// signed URL, and S3-style CORS has no way to grant
+// Access-Control-Allow-Credentials — forcing credentials mode "include" would
+// make the browser require that header and fail. The default already sends
+// cookies on the same-origin first hop, which is all the endpoint needs.
+const DOCUMENT_OPTIONS = { withCredentials: false };
 
 export function PdfReader({ fileUrl, annotations, onCreate, apiRef }: SubReaderProps) {
   const [numPages, setNumPages] = useState<number | null>(null);

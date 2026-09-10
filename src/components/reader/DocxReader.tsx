@@ -47,7 +47,11 @@ export function DocxReader({ fileUrl, annotations, onCreate, apiRef }: SubReader
 
   useEffect(() => {
     let cancelled = false;
-    fetch(fileUrl, { credentials: "include" })
+    // Default ("same-origin") credentials mode already sends the session
+    // cookie on this endpoint's same-origin first hop; "include" would
+    // additionally demand the redirect target (a cross-origin signed R2 URL)
+    // grant Access-Control-Allow-Credentials, which S3-style CORS can't do.
+    fetch(fileUrl)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch document");
         return res.arrayBuffer();
