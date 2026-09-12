@@ -111,7 +111,7 @@ export function ReaderShell(props: {
 
   return (
     <div className="flex h-screen flex-col bg-navy">
-      <header className="flex items-center justify-between border-b border-white/10 bg-navy px-4 py-2 text-background">
+      <header className="relative z-30 flex items-center justify-between border-b border-white/10 bg-navy px-4 py-2 text-background">
         <div className="flex items-center gap-3 overflow-hidden">
           <Link href={`/books/${props.bookId}`} className="text-sm text-background/70 hover:text-gold">
             ← Back
