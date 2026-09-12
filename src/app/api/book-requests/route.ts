@@ -8,7 +8,7 @@ import { auth } from "@/lib/auth";
 // mandatory. Requests always land in the librarian inbox (never silently
 // dropped) and are never returned with librarian-only fields here.
 const bookRequestSchema = z.object({
-  title: z.string().min(1).max(500),
+  title: z.string().trim().min(1).max(500),
   author: z.string().max(300).optional(),
   language: z.string().max(200).optional(),
   churchTradition: z.string().max(200).optional(),
