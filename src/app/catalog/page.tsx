@@ -18,6 +18,14 @@ function first(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value;
 }
 
+// Prisma's `contains` compiles to a raw ILIKE '%…%' pattern and does not escape
+// the user's input, so a literal % or _ in a search term acts as a SQL wildcard
+// (e.g. searching "%" matches every book instead of none). Escape LIKE
+// metacharacters so the search term is always matched literally.
+function escapeLike(value: string): string {
+  return value.replace(/[\\%_]/g, (c) => `\\${c}`);
+}
+
 // Full text search across the descriptive fields (spec §4) — the bookshelf
 // carousel is a discovery surface, not the only way to find a specific book;
 // this page is that other way.
@@ -44,12 +52,12 @@ export default async function CatalogPage({
       q
         ? {
             OR: [
-              { title: { contains: q, mode: "insensitive" } },
-              { alternateTitle: { contains: q, mode: "insensitive" } },
-              { originalTitle: { contains: q, mode: "insensitive" } },
-              { author: { contains: q, mode: "insensitive" } },
-              { translator: { contains: q, mode: "insensitive" } },
-              { description: { contains: q, mode: "insensitive" } },
+              { title: { contains: escapeLike(q), mode: "insensitive" } },
+              { alternateTitle: { contains: escapeLike(q), mode: "insensitive" } },
+              { originalTitle: { contains: escapeLike(q), mode: "insensitive" } },
+              { author: { contains: escapeLike(q), mode: "insensitive" } },
+              { translator: { contains: escapeLike(q), mode: "insensitive" } },
+              { description: { contains: escapeLike(q), mode: "insensitive" } },
             ],
           }
         : {},
