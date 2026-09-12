@@ -77,7 +77,7 @@ export async function SiteFooter() {
         )}
 
         <div className="mt-10 flex flex-col gap-3 border-t border-border pt-6 text-xs text-muted sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} OrientalCodex.</p>
+          <p>© {new Date().getFullYear()} Oriental Archive.</p>
           <div className="flex items-center gap-4">
             <Link href="/privacy" className="hover:text-burgundy">
               Privacy

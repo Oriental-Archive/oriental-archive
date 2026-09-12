@@ -13,7 +13,7 @@ export function ChurchCommunionSection() {
           Across the Oriental Orthodox Communion
         </h2>
         <p className="mx-auto mt-4 max-w-2xl text-sm text-muted">
-          OrientalCodex gathers and preserves literature from across the Oriental Orthodox family —
+          Oriental Archive gathers and preserves literature from across the Oriental Orthodox family —
           six churches, sharing one apostolic tradition since before Chalcedon.
         </p>
 

@@ -6,7 +6,7 @@ import { auth } from "@/lib/auth";
 import { canViewBook } from "@/lib/visibility";
 import { BookCard } from "@/components/BookCard";
 
-export const metadata = { title: "Private — OrientalCodex" };
+export const metadata = { title: "Private — Oriental Archive" };
 
 // Only privately-*granted* items belong here — anything PUBLIC already shows
 // up in the normal Catalog/Reading Paths/Collections listings, so surfacing

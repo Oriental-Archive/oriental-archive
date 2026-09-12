@@ -1,4 +1,4 @@
-# OrientalCodex
+# Oriental Archive
 
 A digital library for Oriental Orthodox theological texts — patristics, liturgical works, and church history — with a public catalog, an in-browser reader, and a librarian admin area for managing the collection.
 

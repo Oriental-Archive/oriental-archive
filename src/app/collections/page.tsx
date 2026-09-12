@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { collectionVisibilityWhere, canViewBook } from "@/lib/visibility";
 
-export const metadata = { title: "Collections — OrientalCodex" };
+export const metadata = { title: "Collections — Oriental Archive" };
 
 export default async function CollectionsPage() {
   const session = await auth.api.getSession({ headers: await headers() });

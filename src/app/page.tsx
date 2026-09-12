@@ -6,7 +6,7 @@ import { FeaturedBooks } from "@/components/home/FeaturedBooks";
 import { ExploreLibrary, type ExploreTerm } from "@/components/home/ExploreLibrary";
 import { ReadingPathsPreview, type ReadingPathPreviewData } from "@/components/home/ReadingPathsPreview";
 import { CollectionsPreview, type CollectionPreviewData } from "@/components/home/CollectionsPreview";
-import { ChurchCommunionSection } from "@/components/ChurchCommunionSection";
+// import { ChurchCommunionSection } from "@/components/ChurchCommunionSection"; — on hold, see below
 import { RequestBookCTA } from "@/components/home/RequestBookCTA";
 
 const BOOKSHELF_SELECT = {
@@ -120,7 +120,9 @@ export default async function Home() {
       <ExploreLibrary categories={exploreCategories} />
       <ReadingPathsPreview paths={readingPaths} />
       <CollectionsPreview collections={collections} />
-      <ChurchCommunionSection />
+      {/* On hold until each sister church's bishop has approved use of its emblem —
+          see ChurchCommunionSection.tsx. Re-enable by uncommenting this line. */}
+      {/* <ChurchCommunionSection /> */}
       <RequestBookCTA />
     </main>
   );

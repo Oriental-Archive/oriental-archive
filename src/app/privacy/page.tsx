@@ -1,6 +1,6 @@
 import { getSiteSettings } from "@/lib/site-settings";
 
-export const metadata = { title: "Privacy — OrientalCodex" };
+export const metadata = { title: "Privacy — Oriental Archive" };
 
 // Deliberately not linked from the footer yet — draft, pending review before
 // it's treated as the site's actual policy. Content should stay honest about
@@ -18,7 +18,7 @@ export default async function PrivacyPage() {
       <p className="mt-2 text-xs text-muted">Last updated {LAST_UPDATED}.</p>
 
       <p className="mt-6 text-sm leading-relaxed text-foreground">
-        This page describes what OrientalCodex actually stores and why, in plain terms. It isn&apos;t
+        This page describes what Oriental Archive actually stores and why, in plain terms. It isn&apos;t
         a legal document — if you need a formal compliance statement for your jurisdiction, have it
         reviewed accordingly.
       </p>

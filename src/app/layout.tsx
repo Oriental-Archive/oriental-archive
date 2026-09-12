@@ -29,7 +29,7 @@ const spectral = Spectral({
 });
 
 export const metadata: Metadata = {
-  title: "OrientalCodex",
+  title: "Oriental Archive",
   description: "A digital library for Oriental Orthodox literature.",
 };
 

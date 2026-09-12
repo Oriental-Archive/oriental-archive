@@ -76,7 +76,7 @@ export default function LoginPage() {
   return (
     <main className="grid flex-1 sm:grid-cols-2">
       <div className="flex flex-col justify-center bg-navy px-8 py-12 sm:px-14 sm:py-16">
-        <p className="font-serif text-2xl text-background">OrientalCodex</p>
+        <p className="font-serif text-2xl text-background">Oriental Archive</p>
         <p className="mt-4 max-w-xs font-serif text-base text-background/70 italic">
           A reading room for Oriental Orthodox manuscripts, homilies, and
           hagiography — open to librarians and registered readers.

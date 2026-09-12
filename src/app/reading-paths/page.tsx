@@ -6,7 +6,7 @@ import { readingPathVisibilityWhere, canViewBook } from "@/lib/visibility";
 import { getSiteSettings } from "@/lib/site-settings";
 import { Badge } from "@/components/ui/Badge";
 
-export const metadata = { title: "Reading Paths — OrientalCodex" };
+export const metadata = { title: "Reading Paths — Oriental Archive" };
 
 export default async function ReadingPathsPage() {
   const [session, { featured }] = await Promise.all([

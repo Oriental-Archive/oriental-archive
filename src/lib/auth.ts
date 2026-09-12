@@ -45,7 +45,7 @@ const databaseHooks = {
 // create accounts). This is the only instance ever wired into the HTTP route
 // at src/app/api/auth/[...all]/route.ts.
 export const auth = betterAuth({
-  appName: "OrientalCodex",
+  appName: "Oriental Archive",
   secret: process.env.BETTER_AUTH_SECRET,
   baseURL: process.env.BETTER_AUTH_URL,
   database,
@@ -85,7 +85,7 @@ export const auth = betterAuth({
       },
     },
   },
-  plugins: [twoFactor({ issuer: "OrientalCodex" })],
+  plugins: [twoFactor({ issuer: "Oriental Archive" })],
 });
 
 // Sign-up enabled, but never exposed over HTTP. Used only by trusted server
@@ -93,7 +93,7 @@ export const auth = betterAuth({
 // createAccount() helper in src/lib/authz.ts, and the one-time Master
 // Librarian bootstrap in prisma/seed.ts.
 export const provisioningAuth = betterAuth({
-  appName: "OrientalCodex",
+  appName: "Oriental Archive",
   secret: process.env.BETTER_AUTH_SECRET,
   baseURL: process.env.BETTER_AUTH_URL,
   database,
@@ -133,5 +133,5 @@ export const provisioningAuth = betterAuth({
       },
     },
   },
-  plugins: [twoFactor({ issuer: "OrientalCodex" })],
+  plugins: [twoFactor({ issuer: "Oriental Archive" })],
 });

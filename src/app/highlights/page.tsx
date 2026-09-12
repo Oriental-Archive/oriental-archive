@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { HighlightsManager } from "@/components/HighlightsManager";
 
-export const metadata = { title: "Highlights — OrientalCodex" };
+export const metadata = { title: "Highlights — Oriental Archive" };
 
 export default async function HighlightsPage() {
   const session = await auth.api.getSession({ headers: await headers() });

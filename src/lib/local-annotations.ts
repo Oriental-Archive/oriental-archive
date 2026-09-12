@@ -24,7 +24,7 @@ export type LocalAnnotation = {
   updatedAt: string | Date;
 };
 
-const DB_NAME = "oriental-codex-annotations";
+const DB_NAME = "oriental-archive-annotations";
 const STORE = "annotations";
 
 function openDb(): Promise<IDBDatabase> {

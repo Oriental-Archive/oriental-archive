@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  /* OrientalCodex brand palette (spec: white/off-white, deep burgundy, dark
+  /* Oriental Archive brand palette (spec: white/off-white, deep burgundy, dark
      navy, restrained gold, professional rather than flashy). Deliberately
      not theme-switched for dark mode — a scholarly print-library look stays
      consistent regardless of OS theme, the same way it would in print.

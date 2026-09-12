@@ -8,7 +8,7 @@ import { Field, Input, Select } from "@/components/ui/Field";
 import { Button } from "@/components/ui/Button";
 import type { Prisma } from "@/generated/prisma/client";
 
-export const metadata = { title: "Catalog — OrientalCodex" };
+export const metadata = { title: "Catalog — Oriental Archive" };
 
 const PAGE_SIZE = 24;
 

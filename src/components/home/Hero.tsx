@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { HeroSearch } from "@/components/home/HeroSearch";
 import { BookCoverPlaceholder } from "@/components/BookCoverPlaceholder";
+import { Logo } from "@/components/Logo";
 import type { BookshelfBook } from "@/lib/bookshelf";
 
 // Asymmetric masthead (spec: reject "a giant centered serif headline that
@@ -15,6 +16,7 @@ export function Hero({ books }: { books: BookshelfBook[] }) {
     <section className="border-b border-border">
       <div className="mx-auto grid max-w-6xl grid-cols-1 gap-12 px-6 py-16 md:grid-cols-[1.1fr_0.9fr] md:items-center md:py-20">
         <div className="max-w-xl">
+          <Logo size="hero" linkToHome={false} className="mb-6" />
           <p className="text-xs tracking-[0.14em] text-burgundy uppercase">
             An Oriental Orthodox Digital Library
           </p>
@@ -22,7 +24,7 @@ export function Hero({ books }: { books: BookshelfBook[] }) {
             Oriental Orthodox literature, preserved for study.
           </h1>
           <p className="mt-5 max-w-md text-base text-muted">
-            OrientalCodex gathers theological writings, patristic works, liturgical texts,
+            Oriental Archive gathers theological writings, patristic works, liturgical texts,
             hagiography, and history from across the Oriental Orthodox tradition, held in one
             reading room.
           </p>
