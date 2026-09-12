@@ -34,7 +34,7 @@ export default async function CatalogPage({
   const documentTypeId = first(sp.documentType);
   const topicId = first(sp.topic);
   const downloadOnly = first(sp.download) === "1";
-  const page = Math.max(1, Number(first(sp.page)) || 1);
+  const requestedPage = Math.max(1, Number(first(sp.page)) || 1);
 
   const session = await auth.api.getSession({ headers: await headers() });
 
@@ -62,7 +62,15 @@ export default async function CatalogPage({
     ],
   };
 
-  const [books, total, languages, traditions, categories, documentTypes, topics] =
+  // total must be known before books can be fetched — a requested page past
+  // the last one (a stale bookmark, or filters narrowing the result set
+  // since the link was shared) needs to clamp down to a page that actually
+  // exists rather than confidently rendering "56 books" above an empty grid.
+  const total = await prisma.book.count({ where });
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const page = Math.min(requestedPage, totalPages);
+
+  const [books, languages, traditions, categories, documentTypes, topics] =
     await Promise.all([
       prisma.book.findMany({
         where,
@@ -71,15 +79,12 @@ export default async function CatalogPage({
         skip: (page - 1) * PAGE_SIZE,
         take: PAGE_SIZE,
       }),
-      prisma.book.count({ where }),
       prisma.controlledTerm.findMany({ where: { type: "LANGUAGE", active: true }, orderBy: { label: "asc" } }),
       prisma.controlledTerm.findMany({ where: { type: "CHURCH_TRADITION", active: true }, orderBy: { label: "asc" } }),
       prisma.controlledTerm.findMany({ where: { type: "CATEGORY", active: true }, orderBy: { label: "asc" } }),
       prisma.controlledTerm.findMany({ where: { type: "DOCUMENT_TYPE", active: true }, orderBy: { label: "asc" } }),
       prisma.controlledTerm.findMany({ where: { type: "TOPIC", active: true }, orderBy: { label: "asc" } }),
     ]);
-
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const activeFilterCount = [languageId, churchTraditionId, categoryId, documentTypeId, topicId, downloadOnly || undefined]
     .filter(Boolean).length;
 
