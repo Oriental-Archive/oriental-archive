@@ -79,17 +79,19 @@ export async function listAllLocalAnnotations(): Promise<LocalAnnotation[]> {
 }
 
 export async function createLocalAnnotation(
-  data: Omit<LocalAnnotation, "id" | "createdAt" | "updatedAt">
+  data: Omit<LocalAnnotation, "id" | "createdAt" | "updatedAt"> & { id?: string }
 ): Promise<LocalAnnotation> {
   const now = new Date().toISOString();
-  const annotation: LocalAnnotation = { ...data, id: crypto.randomUUID(), createdAt: now, updatedAt: now };
-  await withStore("readwrite", (store) => store.add(annotation));
+  const annotation: LocalAnnotation = { ...data, id: data.id ?? crypto.randomUUID(), createdAt: now, updatedAt: now };
+  // put, not add: a retried create with the same client id must succeed
+  // (as it does on the server), not fail with a duplicate-key error.
+  await withStore("readwrite", (store) => store.put(annotation));
   return annotation;
 }
 
 export async function updateLocalAnnotation(
   id: string,
-  patch: Partial<Pick<LocalAnnotation, "note" | "highlightData">>
+  patch: Partial<Pick<LocalAnnotation, "note" | "highlightData" | "location">>
 ): Promise<LocalAnnotation | null> {
   const db = await openDb();
   return new Promise((resolve, reject) => {

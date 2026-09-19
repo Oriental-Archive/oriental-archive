@@ -44,6 +44,13 @@ export default async function PrivacyPage() {
           us at all. They stay on that one device and disappear if you clear your browser&apos;s
           site data.
         </p>
+        <p className="mt-3">
+          The PDF reader also keeps a few things in your own browser, whether or not you&apos;re
+          signed in: where you stopped reading each book, your display settings, and any research
+          notes and saved citations you write in its notes panel. These are never sent to us and do
+          not follow you to other devices. They stay on that one device and disappear if you clear
+          your browser&apos;s site data.
+        </p>
       </Section>
 
       <Section title="Cookies">

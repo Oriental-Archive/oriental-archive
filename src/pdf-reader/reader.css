@@ -1,0 +1,60 @@
+@import "./text-layer.css";
+
+/* Safe areas (notch, home indicator, landscape insets) and the on-screen
+   keyboard height. On :root, not .reader-root, because --kb is written to
+   <html> by useKeyboardInset — a .reader-root declaration would shadow it. */
+:root {
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+  --kb: 0px;
+}
+
+/* The reader is a full-viewport layer over the site chrome. It scrolls inside
+   its own surfaces, so the page underneath must never rubber-band with it. */
+.reader-root {
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* 100vh on mobile includes the area under a collapsing address bar, which
+   pushes bottom controls off-screen; dvh tracks the visible height. */
+.h-app {
+  height: 100svh;
+  height: 100dvh;
+}
+
+/* Chrome that should never start a text selection or a callout on long-press. */
+.no-callout {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+@keyframes sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+}
+@keyframes sheet-side {
+  from {
+    transform: translateX(100%);
+  }
+}
+@keyframes sheet-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reader-root *,
+  .reader-root *::before,
+  .reader-root *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

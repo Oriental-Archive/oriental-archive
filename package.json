@@ -14,7 +14,8 @@
     "seed:master-librarian": "tsx prisma/seed.ts",
     "seed:vocabulary": "tsx scripts/seed-vocabulary.ts",
     "verify:master-librarian": "tsx scripts/verify-master-librarian.ts",
-    "verify:private-book-access": "tsx scripts/verify-private-book-access.ts"
+    "verify:private-book-access": "tsx scripts/verify-private-book-access.ts",
+    "verify:reader-records": "tsx scripts/verify-reader-records.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1127.0",
@@ -26,6 +27,7 @@
     "dompurify": "^3.4.14",
     "epubjs": "^0.3.93",
     "file-type": "^22.0.2",
+    "lucide-react": "^1.47.0",
     "mammoth": "^1.12.2",
     "next": "16.3.4",
     "pdfjs-dist": "5.4.296",
