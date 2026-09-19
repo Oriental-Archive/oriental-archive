@@ -9,6 +9,18 @@
         "dev"
       ],
       "port": 3000
+    },
+    {
+      "name": "pdf-reader",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:\\Users\\Eyuel\\pdf-reader\\node_modules\\vite\\bin\\vite.js",
+        "C:\\Users\\Eyuel\\pdf-reader",
+        "--port",
+        "5183",
+        "--strictPort"
+      ],
+      "port": 5183
     }
   ]
 }
