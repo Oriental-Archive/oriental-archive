@@ -97,15 +97,21 @@ export function Bookshelf(props: { initialBooks: BookshelfBook[]; initialCursor:
   function onPointerDown(e: React.PointerEvent) {
     if (e.pointerType !== "mouse" || !scrollerRef.current) return;
     dragRef.current = { startX: e.clientX, startScrollLeft: scrollerRef.current.scrollLeft, moved: false };
-    scrollerRef.current.setPointerCapture(e.pointerId);
   }
 
   function onPointerMove(e: React.PointerEvent) {
     const drag = dragRef.current;
     if (!drag || !scrollerRef.current) return;
     const delta = e.clientX - drag.startX;
-    if (Math.abs(delta) > 3) drag.moved = true;
-    scrollerRef.current.scrollLeft = drag.startScrollLeft - delta;
+    if (!drag.moved && Math.abs(delta) > 3) {
+      drag.moved = true;
+      // Capture only once this is really a drag. Capturing on pointerdown
+      // (as this used to) makes the browser deliver the closing click to the
+      // shelf instead of the book link under the cursor, so a plain click
+      // on a book did nothing.
+      scrollerRef.current.setPointerCapture(e.pointerId);
+    }
+    if (drag.moved) scrollerRef.current.scrollLeft = drag.startScrollLeft - delta;
   }
 
   function onPointerUp() {
