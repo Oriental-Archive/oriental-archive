@@ -29,6 +29,10 @@ export async function GET(
 }
 
 const createAnnotationSchema = z.object({
+  // Optional client-chosen id (the PDF reader mints UUIDs so its undo/redo
+  // and cross-references keep working before the server has answered).
+  // UUID-shaped so it can never collide with a server-generated cuid.
+  id: z.string().uuid().optional(),
   documentVersionId: z.string().min(1),
   location: z.unknown(),
   selectedText: z.string().max(20000).optional(),
@@ -59,7 +63,18 @@ export async function POST(
     // object literal: Prisma's create-input type is a checked/unchecked XOR
     // union, and TypeScript loses the "optional" leniency on highlightData
     // when it's introduced via `...(cond ? {a} : {})` inside that literal.
+    // A retried create (the first response was lost) must not fail or
+    // duplicate: the same owner re-sending the same id gets the row back.
+    if (body.id) {
+      const existing = await prisma.annotation.findUnique({ where: { id: body.id } });
+      if (existing) {
+        if (existing.userId !== session.user.id) throw new AuthzError("Not found", 404);
+        return NextResponse.json(existing, { status: 200 });
+      }
+    }
+
     const data: Prisma.AnnotationUncheckedCreateInput = {
+      id: body.id,
       userId: session.user.id,
       bookId,
       documentVersionId: body.documentVersionId,

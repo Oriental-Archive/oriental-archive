@@ -19,6 +19,8 @@ async function loadOwned(annotationId: string, userId: string) {
 const updateSchema = z.object({
   note: z.string().max(5000).nullish(),
   highlightData: z.unknown().optional(),
+  // Bookmarks made by the PDF reader keep their title/note/tag here.
+  location: z.unknown().optional(),
 });
 
 export async function PATCH(
@@ -34,6 +36,7 @@ export async function PATCH(
     const data: Prisma.AnnotationUncheckedUpdateInput = {};
     if (body.note !== undefined) data.note = body.note;
     if (body.highlightData !== undefined) data.highlightData = body.highlightData as Prisma.InputJsonValue;
+    if (body.location !== undefined) data.location = body.location as Prisma.InputJsonValue;
 
     const updated = await prisma.annotation.update({
       where: { id: annotationId },

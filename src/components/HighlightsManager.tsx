@@ -7,7 +7,7 @@ import {
   deleteLocalAnnotation,
   updateLocalAnnotation,
 } from "@/lib/local-annotations";
-import type { Annotation } from "@/lib/annotation-store";
+import { describeMark, type Annotation } from "@/lib/annotation-store";
 import { Card } from "@/components/ui/Card";
 import { ConfirmButton } from "@/components/ui/ConfirmButton";
 import { Textarea } from "@/components/ui/Field";
@@ -147,7 +147,7 @@ export function HighlightsManager(props: {
                   {highlights.map((h) => (
                     <Card as="li" key={h.id} padding="md" className="text-sm">
                       <p dir="auto" className="text-foreground">
-                        &ldquo;{h.selectedText}&rdquo;
+                        {h.selectedText ? <>&ldquo;{h.selectedText}&rdquo;</> : <em>{describeMark(h)}</em>}
                       </p>
                       <NoteEditor note={h.note ?? ""} onSave={(note) => updateNote(h.id, note)} />
                       <ConfirmButton

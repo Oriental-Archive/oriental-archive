@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { createAnnotationStore, type Annotation, type AnnotationInput } from "@/lib/annotation-store";
+import { createAnnotationStore, describeMark, type Annotation, type AnnotationInput } from "@/lib/annotation-store";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { ConfirmButton } from "@/components/ui/ConfirmButton";
@@ -180,7 +180,7 @@ export function ReaderShell(props: {
                       dir="auto"
                       className="line-clamp-3 text-left text-foreground hover:text-burgundy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
                     >
-                      &ldquo;{h.selectedText}&rdquo;
+                      {h.selectedText ? <>&ldquo;{h.selectedText}&rdquo;</> : <em>{describeMark(h)}</em>}
                     </button>
                     <NoteEditor
                       note={h.note ?? ""}

@@ -44,9 +44,75 @@
   --success: #3f6b3f;
   --warning: #9a6b1f;
   --info: #3a5a78;
+
+  /* PDF reader (src/pdf-reader) tokens. The reader was designed with its own
+     token names (bg-surface-hover, text-text-secondary, bg-accent, ...);
+     they're defined here, in terms of the brand palette above, so the reader
+     can't drift from the rest of the site. Where the reader has a role the
+     site palette doesn't (a hover surface, five highlighter colors), it is
+     composed from existing brand colors rather than introducing new hues. */
+  --background-secondary: var(--surface-muted); /* the canvas the pages sit on */
+  --surface-elevated: var(--surface);
+  --surface-hover: var(--surface-muted);
+  --surface-active: var(--border);
+  --text-primary: var(--foreground);
+  --text-secondary: var(--muted);
+  --text-muted: color-mix(in srgb, var(--muted) 65%, var(--background));
+  --accent: var(--navy);
+  --accent-hover: var(--burgundy); /* same navy -> burgundy hover as Button */
+  --accent-subtle: color-mix(in srgb, var(--navy) 8%, var(--surface));
+  --selection: color-mix(in srgb, var(--gold) 30%, transparent);
+  --highlight-yellow: var(--gold); /* the old reader's only highlight color */
+  --highlight-green: var(--success);
+  --highlight-blue: var(--info);
+  --highlight-red: var(--burgundy);
+  --highlight-purple: #6f4f86; /* muted plum — the one hue the brand palette has no stand-in for */
+}
+
+/* The reader's optional dark theme. Unlike the rest of the app (deliberately
+   light-only, see above) the reader is a place people sit in for hours, so it
+   offers a night option — but scoped to the reader's own root element and
+   built from the same navy/gold family, so it still reads as Oriental
+   Archive, and it only applies when the reader is explicitly set to dark
+   (the site never follows the OS theme). */
+.reader-root.dark {
+  --background: #121b24;
+  --background-secondary: #16212b;
+  --surface: var(--navy);
+  --surface-elevated: #233445;
+  --surface-hover: #2a3d50;
+  --surface-active: #324a60;
+  --border: #2f4356;
+  --border-strong: #435a70;
+  --text-primary: #efeadf;
+  --text-secondary: #b3bcc5;
+  --text-muted: #7f8b97;
+  --accent: #d2b45c; /* --gold, lifted for contrast on navy */
+  --accent-hover: #e3c979;
+  --accent-subtle: #2b3138;
+  --selection: color-mix(in srgb, var(--gold) 35%, transparent);
+  --danger: #d9707d; /* --burgundy, lifted for contrast on navy */
+  --success: #7fb07f;
+  --warning: #d1a054;
 }
 
 @theme inline {
+  --color-background-secondary: var(--background-secondary);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-surface-hover: var(--surface-hover);
+  --color-surface-active: var(--surface-active);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-subtle: var(--accent-subtle);
+  --color-selection: var(--selection);
+  --color-highlight-yellow: var(--highlight-yellow);
+  --color-highlight-green: var(--highlight-green);
+  --color-highlight-blue: var(--highlight-blue);
+  --color-highlight-red: var(--highlight-red);
+  --color-highlight-purple: var(--highlight-purple);
   --color-background: var(--background);
   --color-surface: var(--surface);
   --color-surface-muted: var(--surface-muted);

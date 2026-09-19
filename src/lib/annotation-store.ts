@@ -13,6 +13,9 @@ import {
 // reader's live only in this browser's IndexedDB (spec §22). Reader
 // components call this facade and never need to know which one is active.
 export type AnnotationInput = {
+  // Optional: the PDF reader supplies its own UUIDs; everything else lets
+  // the store mint one.
+  id?: string;
   documentVersionId: string;
   location: unknown;
   selectedText?: string;
@@ -21,6 +24,19 @@ export type AnnotationInput = {
 };
 
 export type Annotation = LocalAnnotation;
+
+// A row with highlightData is a "mark" of some kind. Text highlights carry
+// quoted text; the PDF reader's drawings, boxed areas and note pins don't, so
+// anywhere that lists marks needs a label to show instead of empty quotes.
+export function describeMark(a: Annotation): string {
+  const hd = a.highlightData as { type?: string; page?: number } | null | undefined;
+  const loc = a.location as { page?: number } | null | undefined;
+  const kind = hd?.type === "drawing" ? "Drawing" : hd?.type === "area" ? "Marked area" : hd?.type === "note" ? "Note" : "Highlight";
+  const page = hd?.page ?? loc?.page;
+  return page ? `${kind} on page ${page}` : kind;
+}
+
+export type AnnotationPatch = { note?: string; highlightData?: unknown; location?: unknown };
 
 export function createAnnotationStore(bookId: string, signedIn: boolean) {
   if (signedIn) {
@@ -51,7 +67,7 @@ export function createAnnotationStore(bookId: string, signedIn: boolean) {
       // network-level throw (fetch rejecting outright, not just a non-ok
       // response) must resolve to false too, not reject — an uncaught
       // rejection here would skip the caller's revert-on-failure entirely.
-      update: async (id: string, patch: { note?: string; highlightData?: unknown }): Promise<boolean> => {
+      update: async (id: string, patch: AnnotationPatch): Promise<boolean> => {
         try {
           const res = await fetch(`/api/annotations/${id}`, {
             method: "PATCH",
@@ -66,7 +82,10 @@ export function createAnnotationStore(bookId: string, signedIn: boolean) {
       remove: async (id: string): Promise<boolean> => {
         try {
           const res = await fetch(`/api/annotations/${id}`, { method: "DELETE" });
-          return res.ok;
+          // Already gone (removed on another device) is the outcome the
+          // caller wanted — reporting it as a failure would leave the reader
+          // retrying a delete that can never succeed.
+          return res.ok || res.status === 404;
         } catch {
           return false;
         }
@@ -83,7 +102,7 @@ export function createAnnotationStore(bookId: string, signedIn: boolean) {
     // so, so swallowing this here would erase that distinction — this is
     // the one place in this facade where the caller's .catch(), not this
     // one, is the intended handler.
-    update: (id: string, patch: { note?: string; highlightData?: unknown }) =>
+    update: (id: string, patch: AnnotationPatch) =>
       updateLocalAnnotation(id, patch).then(() => true).catch(() => false),
     remove: (id: string) => deleteLocalAnnotation(id).then(() => true).catch(() => false),
   };
