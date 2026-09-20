@@ -26,6 +26,16 @@
   height: 100dvh;
 }
 
+/* iPhone Safari zooms the whole page into any text field whose text is
+   smaller than 16px, and does not zoom back out — so on touch devices every
+   field in the reader (notes, tags, search, citations) is at least 16px.
+   Unlayered on purpose: it must beat Tailwind's layered text-xs/text-[13px]. */
+@media (pointer: coarse) {
+  .reader-root :is(input, textarea, select) {
+    font-size: 16px;
+  }
+}
+
 /* Chrome that should never start a text selection or a callout on long-press. */
 .no-callout {
   -webkit-touch-callout: none;

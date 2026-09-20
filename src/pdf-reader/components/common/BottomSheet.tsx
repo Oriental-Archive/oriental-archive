@@ -66,18 +66,24 @@ export function BottomSheet({ title, onClose, children, size = "auto", hideTitle
 
   useSheetBackButton(id, onClose);
 
+  // Callers pass a fresh `onClose` on every render, so this effect must not
+  // depend on it: it moves focus to the sheet, and re-running it after each
+  // keystroke in a text field inside the sheet (a note, a search box) stole
+  // focus from that field and dismissed the phone keyboard on every letter.
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
   useEffect(() => {
     const opener = document.activeElement as HTMLElement | null;
     sheetRef.current?.focus({ preventScroll: true });
     function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") closeRef.current();
     }
     window.addEventListener("keydown", onKey);
     return () => {
       window.removeEventListener("keydown", onKey);
       opener?.focus?.({ preventScroll: true });
     };
-  }, [onClose]);
+  }, []);
 
   function onHandleDown(e: React.PointerEvent) {
     if ((e.target as HTMLElement).closest("button")) return; // the close button is still a button
