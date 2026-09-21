@@ -5,6 +5,7 @@ import { isViewerLibrarian } from "@/lib/visibility";
 import { SignOutButton } from "@/components/SignOutButton";
 import { Logo } from "@/components/Logo";
 import { buttonVariants } from "@/components/ui/Button";
+import { CloseMobileMenuOnNavigate } from "@/components/CloseMobileMenuOnNavigate";
 
 const navLinkClass = buttonVariants({ variant: "ghost", size: "inline", className: "px-1 py-1" });
 const utilityLinkClass = buttonVariants({
@@ -75,7 +76,9 @@ export async function SiteHeader() {
       </div>
 
       <input type="checkbox" id="nav-toggle" className="peer hidden" />
+      <CloseMobileMenuOnNavigate />
       <nav
+        id="mobile-nav"
         aria-label="Primary"
         className="hidden flex-col items-start gap-1 border-t border-border px-6 py-4 text-sm peer-checked:flex sm:hidden"
       >
