@@ -62,7 +62,9 @@ export default async function CatalogPage({
           }
         : {},
       languageId ? { languageId } : {},
-      churchTraditionId ? { churchTraditionId } : {},
+      churchTraditionId
+        ? { OR: [{ churchTraditionId }, { additionalTraditions: { some: { id: churchTraditionId } } }] }
+        : {},
       categoryId ? { categoryId } : {},
       documentTypeId ? { documentTypeId } : {},
       topicId ? { topics: { some: { id: topicId } } } : {},

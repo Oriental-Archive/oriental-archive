@@ -15,6 +15,7 @@ export async function GET(
       include: {
         language: true,
         churchTradition: true,
+        additionalTraditions: true,
         category: true,
         documentType: true,
         rightsStatus: true,
@@ -44,6 +45,10 @@ const updateBookSchema = z.object({
   pageCount: z.number().int().positive().nullish(),
   provenance: z.string().max(2000).nullish(),
   scriptureReferences: z.array(z.string().max(200)).max(100).optional(),
+  languageId: z.string().min(1).optional(),
+  churchTraditionId: z.string().min(1).optional(),
+  additionalTraditionIds: z.array(z.string().min(1)).max(20).optional(),
+  documentTypeId: z.string().min(1).optional(),
   categoryId: z.string().min(1).nullish(),
   rightsStatusId: z.string().min(1).nullish(),
   topicIds: z.array(z.string().min(1)).max(50).optional(),
@@ -69,6 +74,10 @@ export async function PATCH(
     const existing = await prisma.book.findUnique({ where: { id } });
     if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
+    if (body.languageId) await assertTermType(body.languageId, "LANGUAGE");
+    if (body.churchTraditionId) await assertTermType(body.churchTraditionId, "CHURCH_TRADITION");
+    for (const t of body.additionalTraditionIds ?? []) await assertTermType(t, "CHURCH_TRADITION");
+    if (body.documentTypeId) await assertTermType(body.documentTypeId, "DOCUMENT_TYPE");
     if (body.categoryId) await assertTermType(body.categoryId, "CATEGORY");
     if (body.rightsStatusId) await assertTermType(body.rightsStatusId, "RIGHTS_STATUS");
     for (const t of body.topicIds ?? []) await assertTermType(t, "TOPIC");
@@ -81,7 +90,8 @@ export async function PATCH(
       );
     }
 
-    const { topicIds, churchFatherIds, privateUserIds, ...bookFields } = body;
+    const { topicIds, churchFatherIds, additionalTraditionIds, privateUserIds, ...bookFields } = body;
+    const primaryTraditionId = body.churchTraditionId ?? existing.churchTraditionId;
 
     const book = await prisma.$transaction(async (tx) => {
       const updated = await tx.book.update({
@@ -89,6 +99,13 @@ export async function PATCH(
         data: {
           ...bookFields,
           ...(topicIds ? { topics: { set: topicIds.map((tid) => ({ id: tid })) } } : {}),
+          ...(additionalTraditionIds
+            ? {
+                additionalTraditions: {
+                  set: additionalTraditionIds.filter((tid) => tid !== primaryTraditionId).map((tid) => ({ id: tid })),
+                },
+              }
+            : {}),
           ...(churchFatherIds
             ? { churchFathers: { set: churchFatherIds.map((tid) => ({ id: tid })) } }
             : {}),

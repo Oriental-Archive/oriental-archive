@@ -25,6 +25,7 @@ export default async function BookDetailPage({
     include: {
       language: true,
       churchTradition: true,
+      additionalTraditions: { orderBy: { label: "asc" } },
       category: true,
       documentType: true,
       rightsStatus: true,
@@ -107,7 +108,10 @@ export default async function BookDetailPage({
             {book.publisher && <Field label="Publisher" value={book.publisher} />}
             {book.publicationYear && <Field label="Published" value={String(book.publicationYear)} />}
             <Field label="Language" value={book.language.label} />
-            <Field label="Church Tradition" value={book.churchTradition.label} />
+            <Field
+              label={book.additionalTraditions.length > 0 ? "Church Traditions" : "Church Tradition"}
+              value={[book.churchTradition, ...book.additionalTraditions].map((t) => t.label).join(", ")}
+            />
             {book.category && <Field label="Category" value={book.category.label} />}
             <Field label="Document Type" value={book.documentType.label} />
             {book.rightsStatus && <Field label="Rights" value={book.rightsStatus.label} />}

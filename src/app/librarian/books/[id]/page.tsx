@@ -26,6 +26,7 @@ export default async function EditBookPage({ params }: { params: Promise<{ id: s
       where: { id },
       include: {
         topics: true,
+        additionalTraditions: true,
         churchFathers: true,
         privateAccess: true,
         versions: { orderBy: { versionNumber: "desc" } },
@@ -114,6 +115,7 @@ export default async function EditBookPage({ params }: { params: Promise<{ id: s
               scriptureReferences: book.scriptureReferences.join(", "),
               languageId: book.languageId,
               churchTraditionId: book.churchTraditionId,
+              additionalTraditionIds: book.additionalTraditions.map((t) => t.id),
               documentTypeId: book.documentTypeId,
               categoryId: book.categoryId ?? "",
               rightsStatusId: book.rightsStatusId ?? "",

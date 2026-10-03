@@ -23,6 +23,7 @@ export type BookMetadataValues = {
   scriptureReferences: string;
   languageId: string;
   churchTraditionId: string;
+  additionalTraditionIds: string[];
   documentTypeId: string;
   categoryId: string;
   rightsStatusId: string;
@@ -45,6 +46,7 @@ export const EMPTY_BOOK_VALUES: BookMetadataValues = {
   scriptureReferences: "",
   languageId: "",
   churchTraditionId: "",
+  additionalTraditionIds: [],
   documentTypeId: "",
   categoryId: "",
   rightsStatusId: "",
@@ -172,6 +174,7 @@ export function BookMetadataForm(props: {
           : [],
         languageId: values.languageId,
         churchTraditionId: values.churchTraditionId,
+        additionalTraditionIds: values.additionalTraditionIds.filter((id) => id !== values.churchTraditionId),
         documentTypeId: values.documentTypeId,
         categoryId: values.categoryId || undefined,
         rightsStatusId: values.rightsStatusId || undefined,
@@ -351,6 +354,34 @@ export function BookMetadataForm(props: {
           </Select>
         </Field>
       </div>
+      {/* A fieldset, not <Field>: Field renders a <label>, and these checkboxes
+          each need their own. The primary tradition is left out of the list. */}
+      <fieldset className="flex flex-col gap-1 text-xs text-muted">
+        <legend className="mb-1">Also belongs to</legend>
+        <div className="flex flex-wrap gap-x-4 gap-y-1">
+          {props.traditions
+            .filter((o) => o.id !== values.churchTraditionId)
+            .map((o) => (
+              <label key={o.id} className="flex items-center gap-2 text-sm text-foreground">
+                <input
+                  type="checkbox"
+                  checked={values.additionalTraditionIds.includes(o.id)}
+                  onChange={(e) =>
+                    set(
+                      "additionalTraditionIds",
+                      e.target.checked
+                        ? [...values.additionalTraditionIds, o.id]
+                        : values.additionalTraditionIds.filter((id) => id !== o.id)
+                    )
+                  }
+                  className="accent-navy"
+                />
+                {o.label}
+              </label>
+            ))}
+        </div>
+        <span className="text-[11px]">Optional — for books shared by more than one tradition.</span>
+      </fieldset>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Field label="Category" hint="Optional.">
           <Select value={values.categoryId} onChange={(e) => set("categoryId", e.target.value)}>
