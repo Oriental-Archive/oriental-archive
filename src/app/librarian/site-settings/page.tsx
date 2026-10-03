@@ -46,7 +46,7 @@ export default async function SiteSettingsPage() {
         </div>
       </section>
 
-      <section className="mt-8">
+      <section id="featured-books" className="mt-8 scroll-mt-20">
         <h2 className="font-serif text-lg text-foreground">Featured Books</h2>
         <p className="mt-1 text-xs text-muted">Shown first on the homepage shelf, in this order.</p>
         <div className="mt-3">

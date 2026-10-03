@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { BookMetadataForm } from "@/components/librarian/BookMetadataForm";
 import { BookVisibilityForm } from "@/components/librarian/BookVisibilityForm";
 import { FileUploadForm } from "@/components/librarian/FileUploadForm";
+import { FeatureBookToggle } from "@/components/librarian/FeatureBookToggle";
+import { getSiteSettings } from "@/lib/site-settings";
 
 async function loadTermOptions() {
   const terms = await prisma.controlledTerm.findMany({ where: { active: true }, orderBy: { label: "asc" } });
@@ -21,7 +23,7 @@ async function loadTermOptions() {
 
 export default async function EditBookPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [book, options, accounts] = await Promise.all([
+  const [book, options, accounts, settings] = await Promise.all([
     prisma.book.findUnique({
       where: { id },
       include: {
@@ -38,6 +40,7 @@ export default async function EditBookPage({ params }: { params: Promise<{ id: s
       select: { id: true, name: true, email: true },
       orderBy: { name: "asc" },
     }),
+    getSiteSettings(),
   ]);
   if (!book) notFound();
 
@@ -63,6 +66,17 @@ export default async function EditBookPage({ params }: { params: Promise<{ id: s
             initialAllowDownload={book.allowDownload}
             initialPrivateUserIds={book.privateAccess.map((p) => p.userId)}
             accounts={accounts}
+          />
+        </div>
+      </section>
+
+      <section className="mt-8">
+        <h2 className="font-serif text-lg text-foreground">Homepage</h2>
+        <div className="mt-3">
+          <FeatureBookToggle
+            bookId={book.id}
+            initialFeatured={settings.featured.bookIds.includes(book.id)}
+            isPublic={book.visibility === "PUBLIC"}
           />
         </div>
       </section>

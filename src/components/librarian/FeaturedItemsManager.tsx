@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { ConfirmButton } from "@/components/ui/ConfirmButton";
-import { Select } from "@/components/ui/Field";
+import { Input, Select } from "@/components/ui/Field";
 
 // Shared by "Featured Books" and "Featured Reading Paths" — both are just
 // an ordered subset of ids, added/removed/reordered the same way as a
@@ -22,7 +22,9 @@ export function FeaturedItemsManager(props: {
   const [error, setError] = useState<string | null>(null);
 
   const byId = new Map(props.allItems.map((i) => [i.id, i.title]));
-  const candidates = props.allItems.filter((i) => !ids.includes(i.id));
+  const [query, setQuery] = useState("");
+  const q = query.trim().toLowerCase();
+  const candidates = props.allItems.filter((i) => !ids.includes(i.id) && (!q || i.title.toLowerCase().includes(q)));
 
   async function save(next: string[]) {
     setBusy(true);
@@ -97,13 +99,23 @@ export function FeaturedItemsManager(props: {
         </ul>
       )}
 
+      <Input
+        type="search"
+        value={query}
+        onChange={(e) => {
+          setQuery(e.target.value);
+          setPendingId("");
+        }}
+        placeholder="Search by title…"
+        aria-label="Search by title"
+      />
       <div className="flex items-end gap-2">
         <Select
           value={pendingId}
           onChange={(e) => setPendingId(e.target.value)}
           className="min-w-48"
         >
-          <option value="">Select…</option>
+          <option value="">{candidates.length ? `Select… (${candidates.length})` : "No matches"}</option>
           {candidates.map((c) => (
             <option key={c.id} value={c.id}>
               {c.title}
