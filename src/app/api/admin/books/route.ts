@@ -18,6 +18,7 @@ const createBookSchema = z.object({
   scriptureReferences: z.array(z.string().max(200)).max(100).default([]),
   languageId: z.string().min(1),
   churchTraditionId: z.string().min(1),
+  additionalTraditionIds: z.array(z.string().min(1)).max(20).default([]),
   documentTypeId: z.string().min(1),
   categoryId: z.string().min(1).optional(),
   rightsStatusId: z.string().min(1).optional(),
@@ -36,6 +37,7 @@ export async function POST(request: Request) {
     await assertTermsValid([
       { id: body.languageId, type: "LANGUAGE" },
       { id: body.churchTraditionId, type: "CHURCH_TRADITION" },
+      ...body.additionalTraditionIds.map((id) => ({ id, type: "CHURCH_TRADITION" as const })),
       { id: body.documentTypeId, type: "DOCUMENT_TYPE" },
       ...(body.categoryId ? [{ id: body.categoryId, type: "CATEGORY" as const }] : []),
       ...(body.rightsStatusId ? [{ id: body.rightsStatusId, type: "RIGHTS_STATUS" as const }] : []),
@@ -43,7 +45,7 @@ export async function POST(request: Request) {
       ...body.churchFatherIds.map((id) => ({ id, type: "CHURCH_FATHER" as const })),
     ]);
 
-    const { topicIds, churchFatherIds, ...bookFields } = body;
+    const { topicIds, churchFatherIds, additionalTraditionIds, ...bookFields } = body;
 
     const book = await prisma.book.create({
       data: {
@@ -52,6 +54,9 @@ export async function POST(request: Request) {
         createdById: session.user.id,
         topics: { connect: topicIds.map((id) => ({ id })) },
         churchFathers: { connect: churchFatherIds.map((id) => ({ id })) },
+        additionalTraditions: {
+          connect: additionalTraditionIds.filter((id) => id !== body.churchTraditionId).map((id) => ({ id })),
+        },
       },
     });
 

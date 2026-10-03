@@ -146,13 +146,14 @@ model ControlledTerm {
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
 
-  booksByLanguage     Book[] @relation("BookLanguage")
-  booksByTradition    Book[] @relation("BookTradition")
-  booksByCategory     Book[] @relation("BookCategory")
-  booksByDocumentType Book[] @relation("BookDocumentType")
-  booksByRights       Book[] @relation("BookRights")
-  booksByTopic        Book[] @relation("BookTopics")
-  booksByChurchFather Book[] @relation("BookChurchFathers")
+  booksByLanguage      Book[] @relation("BookLanguage")
+  booksByTradition     Book[] @relation("BookTradition")
+  booksByAlsoTradition Book[] @relation("BookAdditionalTraditions")
+  booksByCategory      Book[] @relation("BookCategory")
+  booksByDocumentType  Book[] @relation("BookDocumentType")
+  booksByRights        Book[] @relation("BookRights")
+  booksByTopic         Book[] @relation("BookTopics")
+  booksByChurchFather  Book[] @relation("BookChurchFathers")
 
   @@unique([type, value])
   @@index([type, active])
@@ -175,18 +176,21 @@ model Book {
   scriptureReferences  String[] @default([])
   checksumSha256       String?
 
-  languageId        String
-  language          ControlledTerm   @relation("BookLanguage", fields: [languageId], references: [id])
-  churchTraditionId String
-  churchTradition   ControlledTerm   @relation("BookTradition", fields: [churchTraditionId], references: [id])
-  categoryId        String?
-  category          ControlledTerm?  @relation("BookCategory", fields: [categoryId], references: [id])
-  documentTypeId    String
-  documentType      ControlledTerm   @relation("BookDocumentType", fields: [documentTypeId], references: [id])
-  rightsStatusId    String?
-  rightsStatus      ControlledTerm?  @relation("BookRights", fields: [rightsStatusId], references: [id])
-  topics            ControlledTerm[] @relation("BookTopics")
-  churchFathers     ControlledTerm[] @relation("BookChurchFathers")
+  languageId           String
+  language             ControlledTerm   @relation("BookLanguage", fields: [languageId], references: [id])
+  churchTraditionId    String
+  churchTradition      ControlledTerm   @relation("BookTradition", fields: [churchTraditionId], references: [id])
+  // Other traditions a book also belongs to (e.g. shared Ethiopian/Eritrean
+  // texts). churchTradition stays the primary one shown on cards.
+  additionalTraditions ControlledTerm[] @relation("BookAdditionalTraditions")
+  categoryId           String?
+  category             ControlledTerm?  @relation("BookCategory", fields: [categoryId], references: [id])
+  documentTypeId       String
+  documentType         ControlledTerm   @relation("BookDocumentType", fields: [documentTypeId], references: [id])
+  rightsStatusId       String?
+  rightsStatus         ControlledTerm?  @relation("BookRights", fields: [rightsStatusId], references: [id])
+  topics               ControlledTerm[] @relation("BookTopics")
+  churchFathers        ControlledTerm[] @relation("BookChurchFathers")
 
   visibility         Visibility @default(DRAFT)
   allowOnlineReading Boolean    @default(true)
